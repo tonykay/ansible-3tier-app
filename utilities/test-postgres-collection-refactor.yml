@@ -1,0 +1,15 @@
+---
+- name: Deploy, configure, and populate Postgres 10
+  hosts: test
+  become: true
+  gather_facts: false
+
+  collections:
+    - tonykay.postgres
+
+  roles:
+    - common
+    - role: postgres-install
+      postgres_package_state: absent
+      
+...

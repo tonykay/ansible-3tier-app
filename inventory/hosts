@@ -1,0 +1,12 @@
+[control_node]
+control ansible_host=control.ntier
+
+[load_balancers]
+lb_01 ansible_host=node-01.ntier
+
+[app_servers]
+app_01 ansible_host=node-02.ntier
+app_02 ansible_host=node-03.ntier
+
+[database_servers]
+db_01 ansible_host=node-04.ntier

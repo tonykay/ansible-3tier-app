@@ -1,0 +1,41 @@
+---
+- name: Vagrant initial provision of environment
+  hosts: all
+  become: yes
+  vars:
+    vbox_additions_dependencies:
+      - make 
+      - gcc 
+      - kernel-headers 
+      - kernel-devel 
+      - perl 
+      - dkms 
+      - bzip2
+
+  vars_files:
+    - ~tok/secrets/rhel-subscription.yml
+
+  tasks:
+
+    - when: ansible_distribution == "RedHat"
+      name: Activate RHEL RHN subscription if RHEL
+      redhat_subscription:
+        auto_attach:           true
+        username:              "{{ rhel_subscription_username }}"
+        password:              "{{ rhel_subscription_password }}"
+      tags:
+        - rhn
+
+    - name: Install virtualbox guest additions pre-reqs
+      yum:
+        name:     "{{ vbox_additions_dependencies }}"
+        state:    present
+      tags:
+        - vbox
+
+    - name: Set inventory hostname
+      hostname:
+        name:     "{{ inventory_hostname }}"
+      tags:
+        - hostname
+...

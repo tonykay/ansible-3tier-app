@@ -201,8 +201,9 @@
 
     - debug:
         msg: 
-          - "IP is {{ hostvars['db_01']['ansible_default_ipv4']['address'] }}"
+          - "IP is {{ hostvars['appdb1']['ansible_default_ipv4']['address'] }}"
           - "First App server  {{ groups.app_servers[0] }}" 
+        verbosity: 2        
 
     - name: Smoketest Postgres database
       postgresql_ping:
@@ -215,4 +216,22 @@
       run_once: true
       tags:
         - smoketest
+
+- name: End to end smoke tests
+  hosts: load_balancers
+  gather_facts: true
+  become: true
+  tags:
+    - smoketest  
+  tasks:
+
+    - name: Check webserver for correct response
+      uri:
+        url: http://localhost/myapp
+        return_content: yes
+      until: '"Hello World" in result.content'
+      retries: 10
+      delay: 1
+      register: result
+
 ...

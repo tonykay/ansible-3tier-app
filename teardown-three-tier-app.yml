@@ -16,15 +16,6 @@
 
   tasks:
 
-    - name: Open up firewalld Postgres port
-      firewalld:
-        port: "{{ postgres_port }}/tcp"
-        permanent: yes
-        state: disabled
-        immediate: true
-      tags:
-        - security
-
     - name: Remove Postgres packages
       package:
         name: "{{ __package }}"

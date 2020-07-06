@@ -218,20 +218,21 @@
         - smoketest
 
 - name: End to end smoke tests
-  hosts: load_balancers
-  gather_facts: true
-  become: true
+  hosts: app_servers
+  become: false
+  gather_facts: false
   tags:
     - smoketest  
   tasks:
-
+ 
     - name: Check webserver for correct response
       uri:
-        url: http://localhost/myapp
+        url: "http://frontend1.{{ GUID }}.example.opentlc.com"
         return_content: yes
-      until: '"Hello World" in result.content'
+      until: '"Welcome to Tomcat" in result.content'
       retries: 10
       delay: 1
       register: result
+      delegate_to: localhost
 
 ...

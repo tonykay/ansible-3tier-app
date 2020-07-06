@@ -1,12 +1,17 @@
-[control_node]
-control ansible_host=control.ntier
-
 [load_balancers]
-lb_01 ansible_host=node-01.ntier
+frontend1 ansible_host=frontend1."{{ GUID }}".internal
 
 [app_servers]
-app_01 ansible_host=node-02.ntier
-app_02 ansible_host=node-03.ntier
+app1 ansible_host=app1."{{ GUID }}".internal
+app2 ansible_host=app2."{{ GUID }}".internal
 
 [database_servers]
-db_01 ansible_host=node-04.ntier
+appdb1 ansible_host=appdb1."{{ GUID }}".internal
+
+[internal:children]
+load_balancers
+app_servers
+database_servers
+
+[internal:vars]
+GUID="{{ lookup('env', 'GUID') }}"

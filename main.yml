@@ -32,15 +32,6 @@
 
   tasks:
 
-    - name: Open up firewalld Postgres port
-      firewalld:
-        port: "{{ postgres_port }}/tcp"
-        permanent: yes
-        state: enabled
-        immediate: true
-      tags:
-        - security
-
     - name: Install Postgres packages
       package:
         name: "{{ __package }}"
@@ -66,7 +57,7 @@
       template:
         src: pg_hba.conf.j2
         dest: "{{ postgres_10_data_dir }}/pg_hba.conf"
-      notify: Restart_postgres
+      notify: restart_postgres
 
     - name: Setup Postgres to listen on network interfaces
       lineinfile:
@@ -84,6 +75,14 @@
     - name: Configure Postgres resources, user, database etc 
       block:
 
+        - name: Setup Postgres database(s) 
+          postgresql_db:
+            name: "{{ __database.name }}"
+            state: "{{ __database.state | default('present') }}"
+          loop: "{{ postgres_databases }}"
+          loop_control:
+            loop_var: __database
+
         - name: Create Postgres user#(s) 
           postgresql_user:
             name: "{{ __user.name }}"
@@ -98,13 +97,6 @@
             loop_var: __user
           no_log: "{{ postgres_user_no_log_state | default(false) }}" 
 
-        - name: Setup Postgres database(s) 
-          postgresql_db:
-            name: "{{ __database.name }}"
-            state: "{{ __database.state | default('present') }}"
-          loop: "{{ postgres_databases }}"
-          loop_control:
-            loop_var: __database
 
       become_user: "{{ postgres_user }}"
 
@@ -215,7 +207,7 @@
     - name: Smoketest Postgres database
       postgresql_ping:
         db: flask_db
-        login_host: "{{ hostvars['db_01']['ansible_default_ipv4']['address'] }}"
+        login_host: "{{ hostvars['appdb1']['ansible_default_ipv4']['address'] }}"
         login_user: flask
         login_password: redhat
         ssl_mode: disable
